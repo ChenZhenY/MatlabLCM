@@ -53,7 +53,7 @@ for i=1:num_sphere
     debug_visual_msg.sphere_colors(4*(i-1)+2)= 0;
     debug_visual_msg.sphere_colors(4*(i-1)+3)= 0;
     debug_visual_msg.sphere_colors(4*(i-1)+4)= 0.7;
-    debug_visual_msg.sphere_radii(i) = 0.3;
+    debug_visual_msg.sphere_radii(i) = 0;  % 0.3 set this number when need to use 
 end
 
 %% Loading and Processing mat.file
@@ -71,8 +71,8 @@ grf   = data.unity.U;
 foot_pos = data.unity.pfoot;
 
 grf_mag = 250; % magnititude of grf
-grf_vis = 50;  % visualization scale
-% grf     = grf*grf_vis/grf_mag; 
+grf_vis = 40;  % visualization scale
+grf     = grf*grf_vis/grf_mag; 
 sim_freq = 1000; % current default freq is 2kHz, interpolate 250Hz
 t_step = 1/sim_freq;
 
@@ -87,29 +87,29 @@ for i = 1:t_all
     rotM = rotationMatrix(-rotangle(3),'y')*rotationMatrix(-rotangle(2), 'z')*rotationMatrix(-rotangle(1),'x')*rotationMatrix(pi/2, 'y');
     humanoid_state_msg.body_ori_quat_visual(:) = rotm2quat(rotM);
 
-    debug_visual_msg.arrow_base_positions(1)= i/500;
-    debug_visual_msg.arrow_base_positions(2)= -0.3;
-    debug_visual_msg.arrow_base_positions(3)= 1;
-    debug_visual_msg.arrow_directions(1) = 30;
-    debug_visual_msg.arrow_directions(2) = -0.3;
-    debug_visual_msg.arrow_directions(3) = 30;
+%     debug_visual_msg.arrow_base_positions(1)= i/500;
+%     debug_visual_msg.arrow_base_positions(2)= -0.3;
+%     debug_visual_msg.arrow_base_positions(3)= 1;
+%     debug_visual_msg.arrow_directions(1) = 30;
+%     debug_visual_msg.arrow_directions(2) = -0.3;
+%     debug_visual_msg.arrow_directions(3) = 30;
 
-%     debug_visual_msg.arrow_base_positions(1)= foot_pos(i,1);
-%     debug_visual_msg.arrow_base_positions(2)= foot_pos(i,2);
-%     debug_visual_msg.arrow_base_positions(3)= foot_pos(i,3);
-%     debug_visual_msg.arrow_directions(1) = grf(i,1);
-%     debug_visual_msg.arrow_directions(2) = grf(i,2);
-%     debug_visual_msg.arrow_directions(3) = grf(i,3);
-%     debug_visual_msg.arrow_base_positions(4)= foot_pos(i,4);
-%     debug_visual_msg.arrow_base_positions(5)= foot_pos(i,5);
-%     debug_visual_msg.arrow_base_positions(6)= foot_pos(i,6);
-%     debug_visual_msg.arrow_directions(4) = grf(i,7);
-%     debug_visual_msg.arrow_directions(5) = grf(i,8);
-%     debug_visual_msg.arrow_directions(6) = grf(i,9);
+    debug_visual_msg.arrow_base_positions(1)= foot_pos(i,1);
+    debug_visual_msg.arrow_base_positions(2)= foot_pos(i,2);
+    debug_visual_msg.arrow_base_positions(3)= foot_pos(i,3);
+    debug_visual_msg.arrow_directions(1) = grf(i,1);
+    debug_visual_msg.arrow_directions(2) = grf(i,2);
+    debug_visual_msg.arrow_directions(3) = grf(i,3);
+    debug_visual_msg.arrow_base_positions(4)= foot_pos(i,4);
+    debug_visual_msg.arrow_base_positions(5)= foot_pos(i,5);
+    debug_visual_msg.arrow_base_positions(6)= foot_pos(i,6);
+    debug_visual_msg.arrow_directions(4) = grf(i,7);
+    debug_visual_msg.arrow_directions(5) = grf(i,8);
+    debug_visual_msg.arrow_directions(6) = grf(i,9);
 
-    debug_visual_msg.sphere_positions(1) = i/500;
-    debug_visual_msg.sphere_positions(2) = 0;
-    debug_visual_msg.sphere_positions(3) = 0.6;
+%     debug_visual_msg.sphere_positions(1) = i/500;
+%     debug_visual_msg.sphere_positions(2) = 0;
+%     debug_visual_msg.sphere_positions(3) = 0.6;
 
     publisher.publish('humanoid_visualization_info', humanoid_state_msg);
     publisher.publish('debug_visualization', debug_visual_msg);
