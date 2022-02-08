@@ -33,33 +33,17 @@ debug_visual_msg.arrow_nom = [30, 30];
 debug_visual_msg.arrow_ids = ["GRF 1", "GRF 2"]; 
 debug_visual_msg.arrow_colors = zeros(num_arrows*4,1);
 
-for i=1:num_arrows
+for i = 1:num_arrows
     debug_visual_msg.arrow_colors(4*(i-1)+1)= 1;
     debug_visual_msg.arrow_colors(4*(i-1)+2)= 0;
     debug_visual_msg.arrow_colors(4*(i-1)+3)= 0;
     debug_visual_msg.arrow_colors(4*(i-1)+4)= 0.7;
 end
 
-num_sphere = 1;
-debug_visual_msg.sphere_count = num_sphere;
-debug_visual_msg.sphere_elements = num_sphere;
-debug_visual_msg.sphere_position_elements = 3*num_sphere;
-debug_visual_msg.sphere_color_elements = 4*num_sphere;
-debug_visual_msg.sphere_positions = zeros(3*num_sphere,1);
-debug_visual_msg.sphere_radii = zeros(num_sphere, 1);
-debug_visual_msg.sphere_colors = zeros(4*num_sphere,1);
-for i=1:num_sphere
-    debug_visual_msg.sphere_colors(4*(i-1)+1)= 1;
-    debug_visual_msg.sphere_colors(4*(i-1)+2)= 0;
-    debug_visual_msg.sphere_colors(4*(i-1)+3)= 0;
-    debug_visual_msg.sphere_colors(4*(i-1)+4)= 0.7;
-    debug_visual_msg.sphere_radii(i) = 0;  % 0.3 set this number when need to use 
-end
-
 %% Loading and Processing mat.file
 % matfile: x y z roll pitch yaw right(Hipz Hipx Hipy Knee Ankle)7-11 left(Hipz Hipx Hipy Knee Ankle)12-16 rightArm leftArm
 
-data = load("JointInput/unity_foot.mat");
+data = load("JointInput/unity_foot2.mat");
 %data = load("JointInput/example1_interpolate.mat");
 %data  = load("JointInput/GRF.mat");
 %data = load("JointInput/example1.mat");
@@ -68,7 +52,10 @@ t_all = length(data.unity.time);
 ctrl_all = data.unity.state;
 % cop   = data.unity.cop;
 grf   = data.unity.U;
+contact_foot_pos = data.unity.pfoot_contact;
 foot_pos = data.unity.pfoot;
+foot_pos_des = data.unity.pfoot_des;
+
 
 grf_mag = 250; % magnititude of grf
 grf_vis = 40;  % visualization scale
@@ -76,9 +63,35 @@ grf     = grf*grf_vis/grf_mag;
 sim_freq = 1000; % current default freq is 2kHz, interpolate 250Hz
 t_step = 1/sim_freq;
 
+% ------ spheres ------- % 
+num_sphere = 4;
+
+sphere_pos = [foot_pos foot_pos_des];
+sphere_radius  = [0.1 0.1 0.1 0.1];
+sphere_color(:,1) = [1;0;0;0.7];
+sphere_color(:,2) = [1;0;0;0.7];
+sphere_color(:,3) = [0;1;0;0.7];
+sphere_color(:,4) = [0;1;0;0.7];
+
+
+debug_visual_msg.sphere_count = num_sphere;
+debug_visual_msg.sphere_elements = num_sphere;
+debug_visual_msg.sphere_position_elements = 3*num_sphere;
+debug_visual_msg.sphere_color_elements = 4*num_sphere;
+debug_visual_msg.sphere_positions = zeros(3*num_sphere,1);
+debug_visual_msg.sphere_radii = zeros(num_sphere, 1);
+debug_visual_msg.sphere_colors = zeros(4*num_sphere,1);
+
+for i=1:num_sphere
+    debug_visual_msg.sphere_colors(4*(i-1)+1)= sphere_color(1,i);
+    debug_visual_msg.sphere_colors(4*(i-1)+2)= sphere_color(2,i);
+    debug_visual_msg.sphere_colors(4*(i-1)+3)= sphere_color(3,i);
+    debug_visual_msg.sphere_colors(4*(i-1)+4)= sphere_color(4,i);
+    debug_visual_msg.sphere_radii(i) = sphere_radius(i);  % 0.3 set this number when need to use 
+end
+
 % Note: all linear xyz follow the visualized coordinates
 % rotation frame follow the left-hand rule in unity(direction cw)
-
 for i = 1:t_all
     raw_pos = [ctrl_all(i,1), ctrl_all(i,2), ctrl_all(i,3)];
     humanoid_state_msg.body_pos = raw_pos.';
@@ -94,22 +107,25 @@ for i = 1:t_all
 %     debug_visual_msg.arrow_directions(2) = -0.3;
 %     debug_visual_msg.arrow_directions(3) = 30;
 
-    debug_visual_msg.arrow_base_positions(1)= foot_pos(i,1);
-    debug_visual_msg.arrow_base_positions(2)= foot_pos(i,2);
-    debug_visual_msg.arrow_base_positions(3)= foot_pos(i,3);
+    debug_visual_msg.arrow_base_positions(1)= contact_foot_pos(i,1);
+    debug_visual_msg.arrow_base_positions(2)= contact_foot_pos(i,2);
+    debug_visual_msg.arrow_base_positions(3)= contact_foot_pos(i,3);
     debug_visual_msg.arrow_directions(1) = grf(i,1);
     debug_visual_msg.arrow_directions(2) = grf(i,2);
     debug_visual_msg.arrow_directions(3) = grf(i,3);
-    debug_visual_msg.arrow_base_positions(4)= foot_pos(i,4);
-    debug_visual_msg.arrow_base_positions(5)= foot_pos(i,5);
-    debug_visual_msg.arrow_base_positions(6)= foot_pos(i,6);
+    debug_visual_msg.arrow_base_positions(4)= contact_foot_pos(i,4);
+    debug_visual_msg.arrow_base_positions(5)= contact_foot_pos(i,5);
+    debug_visual_msg.arrow_base_positions(6)= contact_foot_pos(i,6);
     debug_visual_msg.arrow_directions(4) = grf(i,7);
     debug_visual_msg.arrow_directions(5) = grf(i,8);
     debug_visual_msg.arrow_directions(6) = grf(i,9);
 
-%     debug_visual_msg.sphere_positions(1) = i/500;
-%     debug_visual_msg.sphere_positions(2) = 0;
-%     debug_visual_msg.sphere_positions(3) = 0.6;
+    for s = 1:num_sphere
+        debug_visual_msg.sphere_positions(1+3*(s-1)) = sphere_pos(i,1+3*(s-1));
+        debug_visual_msg.sphere_positions(2+3*(s-1)) = sphere_pos(i,2+3*(s-1));
+        debug_visual_msg.sphere_positions(3+3*(s-1)) = sphere_pos(i,3+3*(s-1));
+    end
+    
 
     publisher.publish('humanoid_visualization_info', humanoid_state_msg);
     publisher.publish('debug_visualization', debug_visual_msg);
