@@ -43,7 +43,7 @@ end
 %% Loading and Processing mat.file
 % matfile: x y z roll pitch yaw right(Hipz Hipx Hipy Knee Ankle)7-11 left(Hipz Hipx Hipy Knee Ankle)12-16 rightArm leftArm
 
-data = load("JointInput/unity_foot2.mat");
+data = load("JointInput/unity_foot.mat");
 %data = load("JointInput/example1_interpolate.mat");
 %data  = load("JointInput/GRF.mat");
 %data = load("JointInput/example1.mat");
@@ -55,23 +55,26 @@ grf   = data.unity.U;
 contact_foot_pos = data.unity.pfoot_contact;
 foot_pos = data.unity.pfoot;
 foot_pos_des = data.unity.pfoot_des;
+pfNew = data.unity.pfNew;
 
-
+speed_factor = 0.1;
 grf_mag = 250; % magnititude of grf
 grf_vis = 40;  % visualization scale
 grf     = grf*grf_vis/grf_mag; 
-sim_freq = 1000; % current default freq is 2kHz, interpolate 250Hz
+sim_freq = 1000*speed_factor; % current default freq is 2kHz, interpolate 250Hz
 t_step = 1/sim_freq;
 
 % ------ spheres ------- % 
-num_sphere = 4;
+num_sphere = 5;
 
-sphere_pos = [foot_pos foot_pos_des];
-sphere_radius  = [0.1 0.1 0.1 0.1];
+sphere_pos = [foot_pos foot_pos_des pfNew];
+sphere_radius  = [0.1 0.1 0.1 0.1 0.1]/3;
 sphere_color(:,1) = [1;0;0;0.7];
 sphere_color(:,2) = [1;0;0;0.7];
 sphere_color(:,3) = [0;1;0;0.7];
 sphere_color(:,4) = [0;1;0;0.7];
+sphere_color(:,5) = [1;0.5;0;0.7];
+
 
 
 debug_visual_msg.sphere_count = num_sphere;
